@@ -5,7 +5,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -18,5 +17,39 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y \
+          build-essential \
+          autoconf \
+          make \
+          zip \
+          unzip \
+          libx11-dev \
+          libxext-dev \
+          libxrender-dev \
+          libxtst-dev \
+          libcups2-dev \
+          libfontconfig1-dev \
+          libasound2-dev
+
+      - name: Clone JDK repository
+        run: git clone https://git.openjdk.java.net/jdk/
+
       - name: Configure
-        run: bash configure
+        run: |
+          cd jdk
+          bash configure
+
+      - name: Build JDK
+        run: |
+          cd jdk
+          make images
+
+      - name: Verify JDK build
+        run: |
+          ./build/*/images/jdk/bin/java -version
+
+      - name: Run basic tests
+        run: |
+          cd jdk
+          make run-test-tier1
